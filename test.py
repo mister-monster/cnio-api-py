@@ -5,8 +5,8 @@ import time
 cnio = cnio_api.cnio()
 
 # test parameters
-key = "baa822014e8c99942f6afbacbc52ec23b43ffabc768f33a2ad2e65d24675355d"
-recieve_address = "0x5736db83d42a64C278ECe5D61C8bA8A821A76785"
+key = str()
+recieve_address = str()
 extra_id = None
 
 # set the API key for the cnio_api instance for all methods that need it
