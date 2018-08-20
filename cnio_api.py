@@ -91,5 +91,5 @@ class cnio():
         # TODO: implement sockets.io connection and data subscription
 '''
 
-if __name__ != __main__:
+if __name__ != '__main__':
     cnio()
