@@ -18,7 +18,6 @@ import logging
 #from aiohttp import web
 
 class cnio():
-    config = None
     def __init__(self):
         self.key = str()
         self.api = "https://changenow.io/api/v1/"
@@ -121,3 +120,6 @@ class cnio():
         # you are probably going to need to call this on a separate thread
         # TODO: implement sockets.io connection and data subscription
 '''
+
+if __name__ != '__main__':
+    cnio()
