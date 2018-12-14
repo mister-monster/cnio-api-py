@@ -20,7 +20,7 @@ import logging
 class cnio():
     config = None
     def __init__(self):
-        self.key =  str() 
+        self.key = str()
         self.api = "https://changenow.io/api/v1/"
 
     def _get(self, url, headers=None, data=None, params=None):
