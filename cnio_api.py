@@ -13,10 +13,6 @@ import json
 import requests
 import logging
 
-
-#import socketio
-#from aiohttp import web
-
 class cnio():
     def __init__(self):
         self.key = str()
@@ -43,18 +39,31 @@ class cnio():
                 'request.post() failed(status_code:%d)' % req.status_code)
         return json.loads(req.text)
 
-
     def get_pair(self):
-        query = str('/market-info/available-pairs/')
-        endpoint = str(self.api + query)
+        endpoint = str('/market-info/available-pairs/')
+        endpoint = str(self.api + endpoint)
         return self._get(url=endpoint)
 
-    def currencies(self, active):
+    def currencies(self, active, fixed_rate):
         # this method returns the list of supported currencies
-        # use optional param "active" to get only currently active currencies. This should be provided as a bool value
-        query = str("?active=" + str(active))
+        # Both params should be provided as a bool value
+        query = str("?active=" + str(active) + "&fixedRate=" + str(fixed_rate))
         endpoint = "currencies"
         endpoint = str(self.api + endpoint + query)
+        return self._get(url=endpoint)
+
+    def currencies_to(self, ticker, fixed_rate):
+        # this method returns a list of currencies that have trade pairs with the provided currency ticker
+        # query param "fixed_rate" should be provided as a bool value
+        query = str("?fixedRate=" + str(fixed_rate))
+        endpoint = str("currencies-to/" + ticker)
+        endpoint = str(self.api + endpoint + query)
+        return self._get(url=endpoint)
+
+    def specific_currency_info(self, ticker):
+        # this method returns information on a specific currency
+        endpoint = str("currencies/" + ticker)
+        endpoint = str(self.api + endpoint)
         return self._get(url=endpoint)
 
     def min_amount(self, send, receive):
@@ -84,16 +93,51 @@ class cnio():
         self.key = key
 
     # ALL OF THE FOLLOWING ENDPOINTS REQUIRE PROVISION OF AN API KEY
-    def create_transaction(self, send_amount, send, receive, addr, extra_id=""):
+    # THE FOLLOWING ARE STANDARD FLOW (VARIABLE RATE NO LIMIT) API ENDPOINTS
+    def create_transaction(self, send_amount, send, receive, addr, extra_id="", refund_address=""):
         # this endpoint creates a transaction
         # You must provide quite a bit of information. namely, send currency, recieve currency
         # the address you want the recieve currency sent to, the amount you will send,
         # and an "extra ID" for currencies that need it (eg. transaction ID for XMP)
         query = str("?from=" + send + "&to=" + receive + "&address=" + addr +
-                         "&amount=" + str(send_amount) + "&extraId=" + extra_id)
+                         "&amount=" + str(send_amount) + "&extraId=" + extra_id + "&refundAddress=" + refund_address)
         endpoint = str("transactions/" + self.key)
         endpoint = str(self.api + endpoint + query)
         return self._post(endpoint)
+
+    # THE FOLLOWING ARE THE FIXED RATE API ENDPOINTS
+    def available_fixed_markets(self):
+        # this method returns the available keypairs that can be exchanged at a fixed rate
+        endpoint = str("market-info/fixed-rate/" + self.key)
+        endpoint = str(self.api + endpoint)
+        return self._get(endpoint)
+
+    def estimate_fixed_rate_exchange_amount(self, send_amount, send, receive):
+        # this method returns the amount of <recieve> currency you will get for the provided amount of <send> currency
+        # you MUST provide the amount you intend to send, the currency to be sent and the currency to be recieved
+        query = str("?api_key=" + self.key)
+        endpoint = str("exchange-amount/fixed_rate/" + str(send_amount) + "/" + send + "_" + receive)
+        endpoint = str(self.api + endpoint + query)
+        return self._get(endpoint)
+
+    def create_fixed_rate_transaction(self, send_amount, send, receive, addr, extra_id="", refund_address=""):
+        # this endpoint creates a transaction
+        # You must provide quite a bit of information. namely, send currency, recieve currency
+        # the address you want the recieve currency sent to, the amount you will send,
+        # and an "extra ID" for currencies that need it (eg. transaction ID for XMP)
+        query = str("?from=" + send + "&to=" + receive + "&address=" + addr +
+                    "&amount=" + str(send_amount) + "&extraId=" + extra_id + "&refundAddress=" + refund_address)
+        endpoint = str("transactions/fixed_rate/" + self.key)
+        endpoint = str(self.api + endpoint + query)
+        return self._post(endpoint)
+
+    # THE FOLLOWING CAN BE USED FOR VARIABLE AND FIXED RATE TRANSACTIONS
+    def get_transaction_status(self, cnio_transaction_id):
+        # this method returns the transaction status of a transaction. A transaction id
+        # from list_transactions() or create_transaction() MUST be provided.
+        endpoint = str("transactions/" + cnio_transaction_id + "/" + self.key)
+        endpoint = str(self.api + endpoint)
+        return self._get(endpoint)
 
     def list_transactions(self, send="", receive="", status="", limit="", offset=""):
         # this method returns a list of <limit> transactions that were started using the API key
@@ -107,19 +151,6 @@ class cnio():
         endpoint = str(self.api + endpoint + query)
         return self._get(endpoint)
 
-    def get_transaction_status(self, cnio_transaction_id):
-        # this method returns the transaction status of a transaction. A transaction id
-        # from list_transactions() or create_transaction() MUST be provided.
-        endpoint = str("transactions/" + cnio_transaction_id + "/" + self.key)
-        endpoint = str(self.api + endpoint)
-        return self._get(endpoint)
-
-'''
-    def live_tx_updates_socketio(self):
-        # this method interfaces with the socket.io websockets endpoint and gets live transaction updates
-        # you are probably going to need to call this on a separate thread
-        # TODO: implement sockets.io connection and data subscription
-'''
 
 if __name__ != '__main__':
     cnio()
