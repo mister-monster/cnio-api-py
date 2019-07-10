@@ -1,12 +1,11 @@
 import cnio_api
-import json
 import time
 
 cnio = cnio_api.cnio()
 
 # test parameters
-key = str()
-recieve_address = str()
+key = str("baa822014e8c99942f6afbacbc52ec23b43ffabc768f33a2ad2e65d24675355d")
+recieve_address = str("0x5736db83d42a64C278ECe5D61C8bA8A821A76785")
 extra_id = None
 
 # set the API key for the cnio_api instance for all methods that need it
@@ -23,8 +22,13 @@ cnio.api_key(key)
 print(cnio.min_amount("BTC", "ETH"))
 print("===")
 #
-print(cnio.currencies(active=True))
+print(cnio.currencies(active=True, fixed_rate=False))
 print("===")
+#
+print(cnio.currencies_to(ticker="btc", fixed_rate=False))
+print("===")
+#
+print(cnio.specific_currency_info(ticker="btc"))
 #
 print(cnio.est_exchange_rate("1","BTC","ETH"))
 print("===")
@@ -41,12 +45,7 @@ transactions_list = cnio.list_transactions(limit="2")
 print(transactions_list)
 
 print("===")
-transactions_list = str(transactions_list).replace("b'[","")
-transactions_list = transactions_list.replace("]'","")
-transactions_list = transactions_list.replace("},{","} , {")
-transactions_list = transactions_list.split(" , ")
+
 for i in transactions_list:
-    i = json.loads(i)
-    #
     print(cnio.get_transaction_status(i["id"]))
     time.sleep(1)
