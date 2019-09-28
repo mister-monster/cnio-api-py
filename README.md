@@ -7,4 +7,4 @@ a query url to the api looks like this:
 "https://changenow.io/api/v1/endpoint/param1/param2?<query_param_1>=<value>&<query_param_2>=<value>..."
 Read the docs at https://changenow.io/api/docs for more information.
 
-This module depends on requests, socketio and aiohttp.
+This module depends on requests, json and logging Python modules from the standard library.
